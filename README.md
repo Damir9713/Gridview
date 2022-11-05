@@ -1,18 +1,8 @@
- Private Sub SetInitialRow()
-        Dim dt As New DataTable()
-        dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
-        Dim dr As DataRow = dt.NewRow()
-        dt.Rows.Add(dr)
-        ViewState("CurrentTable") = dt
-        Gridview1.DataSource = dt
-        Gridview1.DataBind()
-        Gridview1.Rows(0).Visible = False
-    End Sub
+
 
     Protected Sub ButtonAdd_Click(ByVal sender As Object, ByVal e As EventArgs)
         AddNewRowToGrid()
     End Sub
-
 
     Private Sub AddNewRowToGrid()
 
@@ -30,6 +20,17 @@
             Gridview1.Rows(0).Visible = False
         End If
         SetPreviousData()
+    End Sub
+    
+      Private Sub SetInitialRow()
+        Dim dt As New DataTable()
+        dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
+        Dim dr As DataRow = dt.NewRow()
+        dt.Rows.Add(dr)
+        ViewState("CurrentTable") = dt
+        Gridview1.DataSource = dt
+        Gridview1.DataBind()
+        Gridview1.Rows(0).Visible = False
     End Sub
 
     Private Sub SetPreviousData()

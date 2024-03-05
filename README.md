@@ -84,3 +84,60 @@ Dim workbookPart As WorkbookPart = document.WorkbookPart
 Dim styleIndex As UInt32Value = CreateOrGetFillStyleIndex(workbookPart, "FFFF0000") ' Style avec fond rouge
 ApplyStyleToRange(workbookPart, "A", "AQ", 1, 10, styleIndex) ' Appliquer le style à la plage de cellules de A1 à AQ10
 
+
+' Définir un style de police gras
+Private Function CreateOrGetBoldFontStyleIndex(workbookPart As WorkbookPart) As UInt32Value
+    Dim fonts = workbookPart.WorkbookStylesPart.Stylesheet.Fonts
+    Dim fontCount = fonts.Count()
+
+    ' Vérifiez si la police en gras existe déjà
+    For i As Integer = 0 To fontCount - 1
+        Dim font = fonts.ChildElements(i)
+        If TypeOf font Is Font Then
+            Dim bold = DirectCast(font, Font).Bold
+            If bold IsNot Nothing AndAlso bold.Val = True Then
+                Return i
+            End If
+        End If
+    Next
+
+    ' Ajoutez une nouvelle police en gras
+    Dim newFont = New Font() With {.Bold = New Bold()}
+    fonts.AppendChild(newFont)
+    fonts.Count = fonts.Count() + 1
+
+    ' Sauvegardez les modifications
+    workbookPart.WorkbookStylesPart.Stylesheet.Save()
+
+    Return fontCount
+End Function
+
+' Appliquer un style de police en gras à une plage de cellules
+Private Sub ApplyBoldFontStyleToRange(workbookPart As WorkbookPart, startColumn As String, endColumn As String, startRow As Integer, endRow As Integer, styleIndex As UInt32Value)
+    Dim worksheetPart As WorksheetPart = workbookPart.WorksheetParts.FirstOrDefault()
+    Dim sheetData As SheetData = worksheetPart.Worksheet.Elements(Of SheetData).FirstOrDefault()
+
+    For rowIndex As Integer = startRow To endRow
+        Dim row As Row = sheetData.Elements(Of Row)().Where(Function(r) r.RowIndex.Value = rowIndex).FirstOrDefault()
+        If row Is Nothing Then
+            row = New Row() With {.RowIndex = CType(rowIndex, UInt32)}
+            sheetData.AppendChild(row)
+        End If
+
+        For colIndex As Integer = ColumnIndex(startColumn) To ColumnIndex(endColumn)
+            Dim cellReference As String = GetCellReference(colIndex, rowIndex)
+            Dim cell As Cell = row.Elements(Of Cell).FirstOrDefault(Function(c) c.CellReference.Value = cellReference)
+            If cell Is Nothing Then
+                cell = New Cell() With {.CellReference = cellReference}
+                row.AppendChild(cell)
+            End If
+            cell.StyleIndex = styleIndex
+        Next
+    Next
+
+    workbookPart.WorkbookStylesPart.Stylesheet.Save()
+End Sub
+
+Dim workbookPart As WorkbookPart = document.WorkbookPart
+Dim fontBoldStyleIndex As UInt32Value = CreateOrGetBoldFontStyleIndex(workbookPart) ' Créer un style de police en gras
+ApplyBoldFontStyleToRange(workbookPart, "A", "AQ", 1, 10, fontBoldStyleIndex) ' Appliquer le style en gras à la plage de cellules de A1 à AQ10

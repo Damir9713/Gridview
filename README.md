@@ -391,3 +391,34 @@ Section 3
         Return cellCol >= startCol AndAlso cellCol <= endCol AndAlso cellRow >= startRow AndAlso cellRow <= endRow
     End Function
 ```
+section 4 
+
+```
+' Obtenir la feuille de calcul à partir du document Excel
+Dim worksheet As Worksheet = spreadsheetDocument.WorkbookPart.Workbook.Sheets.Elements(Of Sheet).First().WorksheetPart.Worksheet
+
+' Obtenir la première ligne de la feuille de calcul
+Dim firstRow As Row = worksheet.Elements(Of SheetData).First().Elements(Of Row).First()
+
+' Parcourir les cellules de la première ligne
+For cell As Cell In firstRow.Elements(Of Cell)()
+    ' Vérifier si la cellule fait partie de la plage A1:AQ1
+    If cell.CellReference.Value.StartsWith("A") AndAlso cell.CellReference.Value.EndsWith("1") Then
+        ' Mettre en gras la police de la cellule
+        Dim font As Font = New Font() With {
+            .Bold = True
+        }
+        Dim runProperties As RunProperties = New RunProperties() With {
+            .Font = font
+        }
+        Dim text As Text = New Text() With {
+            .Text = cell.CellValue.Text
+        }
+        cell.CellValue.Remove()
+        cell.Append(New InlineString() With {
+            .Append(runProperties),
+            .Append(text)
+        })
+    End If
+Next
+```

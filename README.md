@@ -141,3 +141,11 @@ End Sub
 Dim workbookPart As WorkbookPart = document.WorkbookPart
 Dim fontBoldStyleIndex As UInt32Value = CreateOrGetBoldFontStyleIndex(workbookPart) ' Créer un style de police en gras
 ApplyBoldFontStyleToRange(workbookPart, "A", "AQ", 1, 10, fontBoldStyleIndex) ' Appliquer le style en gras à la plage de cellules de A1 à AQ10
+
+Dim workbookStylesPart As WorkbookStylesPart = workbookPart.GetPartsOfType(Of WorkbookStylesPart)().FirstOrDefault()
+If workbookStylesPart Is Nothing Then
+    workbookStylesPart = workbookPart.AddNewPart(Of WorkbookStylesPart)()
+    workbookStylesPart.Stylesheet = New Stylesheet()
+    workbookStylesPart.Stylesheet.Fonts = New Fonts()
+    workbookStylesPart.Stylesheet.Save()
+End If

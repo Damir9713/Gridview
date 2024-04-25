@@ -83,6 +83,27 @@ Section 2
 
 Section SQL
 ```
+
+WITH Priorities AS (
+    SELECT *,
+           CASE
+               WHEN id_enregistrement > 0 AND id_modification = 0 THEN 1
+               WHEN id_enregistrement > 0 AND id_modification > 0 THEN 2
+               WHEN id_enregistrement = 0 AND id_modification > 0 THEN 3
+               ELSE 4
+           END AS priority
+    FROM annuaire
+)
+
+SELECT *
+FROM (
+    SELECT *,
+           ROW_NUMBER() OVER(PARTITION BY employee_id ORDER BY priority, id_enregistrement DESC, id_modification DESC) AS rn
+    FROM Priorities
+) AS ranked
+WHERE rn = 1;
+
+
 SELECT a.*
 FROM annuaire a
 INNER JOIN (

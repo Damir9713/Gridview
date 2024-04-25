@@ -86,6 +86,31 @@ Section SQL
 SELECT a.*
 FROM annuaire a
 INNER JOIN (
+    SELECT id_employe,
+           MAX(id_enregistrement) AS max_enregistrement
+    FROM annuaire
+    GROUP BY id_employe
+) max_enr ON a.id_employe = max_enr.id_employe
+INNER JOIN (
+    SELECT id_employe, 
+           id_enregistrement, 
+           MAX(id_modification) AS max_modification
+    FROM annuaire
+    WHERE id_enregistrement = (
+        SELECT MAX(id_enregistrement)
+        FROM annuaire
+        WHERE id_employe = annuaire.id_employe
+    )
+    GROUP BY id_employe, id_enregistrement
+) max_mod ON a.id_employe = max_mod.id_employe 
+           AND a.id_enregistrement = max_mod.id_enregistrement 
+           AND a.id_modification = max_mod.max_modification
+WHERE a.id_enregistrement = max_enr.max_enregistrement
+ORDER BY a.id_employe;
+
+SELECT a.*
+FROM annuaire a
+INNER JOIN (
     SELECT id_employe, 
            MAX(id_enregistrement) AS max_enregistrement
     FROM annuaire

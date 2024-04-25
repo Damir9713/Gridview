@@ -81,6 +81,35 @@ End Function
 ```
 Section 2
 
+Section SQL
+```
+SELECT a.*
+FROM annuaire a
+INNER JOIN (
+    SELECT id_employe, 
+           MAX(id_enregistrement) AS max_enregistrement
+    FROM annuaire
+    GROUP BY id_employe
+) AS max_enr ON a.id_employe = max_enr.id_employe AND a.id_enregistrement = max_enr.max_enregistrement
+LEFT JOIN (
+    SELECT id_employe, 
+           id_enregistrement, 
+           MAX(id_modification) AS max_modification
+    FROM annuaire
+    GROUP BY id_employe, id_enregistrement
+) AS max_mod ON a.id_employe = max_mod.id_employe 
+               AND a.id_enregistrement = max_mod.id_enregistrement 
+               AND a.id_modification = max_mod.max_modification
+WHERE a.id_enregistrement > 0 OR (a.id_enregistrement = 0 AND a.id_modification = (
+    SELECT MAX(id_modification)
+    FROM annuaire
+    WHERE id_employe = a.id_employe AND id_enregistrement = 0
+))
+ORDER BY a.id_employe;
+
+
+```
+
 ```
 Protected Sub ExportToExcel_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ExportButton.Click
     Response.Clear()
